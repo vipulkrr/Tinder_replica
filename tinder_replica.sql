@@ -53,7 +53,49 @@ WHERE EXISTS (
               AND
               s.is_like = 1 AND u2.age > u1.age);
     
-    
+CREATE VIEW user_info AS
+SELECT user_id, name, age, gender, bio, plan
+FROM users;              
+
+SELECT name, age
+FROM user_info;
+
+----Popular users who have received more more than 3 positive likes/swipes?---
+CREATE VIEW popular_users AS
+SELECT u.name, u.age, COUNT(*) AS swipe_count
+FROM users AS u
+INNER JOIN swipes AS s
+ON u.user_id = s.swiped_user_id
+WHERE is_like = 1
+GROUP BY u.user_id, 1, 2
+HAVING COUNT(*) > 3;
+
+SELECT * 
+FROM popular_users;
+
+---UnPopular users who have received more than 2 negative likes/sipes?---
+CREATE VIEW unpopular_users AS
+SELECT u.name, u.age, COUNT(*) AS swipe_count
+FROM users AS u
+INNER JOIN swipes AS s
+ON u.user_id = s.swiped_user_id
+WHERE is_like = 0
+GROUP BY u.user_id,1, 2
+HAVING COUNT(*) >= 3;
+
+SELECT *
+FROM unpopular_users;
+
+------ALTER VIEW-----
+ALTER VIEW popular_users AS
+SELECT u.name, u.age, COUNT( CASE WHEN s.is_like = 1 THEN 1 ELSE NULL END ) AS like_count, COUNT( CASE WHEN s.is_like = 0 THEN 1 ELSE NULL END ) AS dislike_count
+FROM users AS u
+INNER JOIN swipes AS s
+ON u.user_id = s.swiped_user_id
+GROUP BY u.user_id,1, 2
+HAVING COUNT(*) >= 3;
+
+SELECT * FROM popular_users;
     
     
     
